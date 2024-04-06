@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('po_number');
             $table->string('buyer_name');
-            $table->decimal('total',10);
+            $table->decimal('total',10)->default(0);
             $table->timestamps();
         });
     }
