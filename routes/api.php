@@ -20,4 +20,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
+Route::delete('purchase-orders/delete', [PurchaseOrderController::class, 'destroyMany']);
 Route::resource('purchase-orders', PurchaseOrderController::class);
