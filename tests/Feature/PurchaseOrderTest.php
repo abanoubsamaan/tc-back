@@ -33,7 +33,7 @@ class PurchaseOrderTest extends TestCase
         $response->assertJsonStructure([
             'data' => [
                 '*' => [
-                    'id', 'po_number', 'buyer_name', 'date_received', 'date_updated'
+                    'id', 'po_number', 'buyer_name','total', 'date_received', 'date_updated'
                 ]
             ], 'links', 'meta'
         ]);

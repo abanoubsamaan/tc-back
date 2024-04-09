@@ -179,7 +179,7 @@ class PurchaseOrderController extends Controller
         }
         DB::commit();
 
-        return response()->json(['message' => 'Purchase order deleted successfully!']);
+        return response()->json(['message' => 'Purchase orders deleted successfully!']);
     }
 
 

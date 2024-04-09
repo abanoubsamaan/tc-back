@@ -19,8 +19,9 @@ class PurchaseOrderResource extends JsonResource
             'id' => $this->id,
             'po_number' => $this->po_number,
             'buyer_name' => $this->buyer_name,
-            'date_received' => $this->created_at,
-            'date_updated' => $this->updated_at,
+            'total' => $this->total,
+            'date_received' => $this->created_at->format('Y-m-d H:i:s'),
+            'date_updated' => $this->updated_at->format('Y-m-d H:i:s'),
             'items' => PurchaseOrderItemResource::collection($this->whenLoaded('items')),
         ];
     }
