@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\PurchaseOrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -22,3 +23,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::delete('purchase-orders/delete', [PurchaseOrderController::class, 'destroyMany']);
 Route::resource('purchase-orders', PurchaseOrderController::class);
+
+Route::resource('categories', CategoryController::class)->only(['index']);
