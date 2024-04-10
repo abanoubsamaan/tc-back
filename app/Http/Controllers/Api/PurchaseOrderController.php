@@ -13,12 +13,16 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class PurchaseOrderController extends Controller
 {
     /**
      * Get all purchase paginated in descending order
      * @return AnonymousResourceCollection
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function index(): AnonymousResourceCollection
     {
