@@ -19,6 +19,7 @@ class PurchaseOrderItemResource extends JsonResource
             'description' => $this->description,
             'quantity' => $this->quantity,
             'unit_price' => $this->unit_price,
+            'category_id' => $this->category_id,
             'category' => new CategoryResource($this->category),
         ];
     }
