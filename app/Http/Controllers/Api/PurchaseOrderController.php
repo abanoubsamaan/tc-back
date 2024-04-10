@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StorePurchaseOrderRequest;
 use App\Http\Requests\Api\UpdatePurchaseOrderRequest;
 use App\Http\Resources\PurchaseOrderResource;
+use App\Models\Item;
 use App\Models\PurchaseOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PurchaseOrderController extends Controller
 {
@@ -20,9 +22,16 @@ class PurchaseOrderController extends Controller
      */
     public function index(): AnonymousResourceCollection
     {
-        $data = PurchaseOrder::orderBy('id', 'desc')->paginate(10);
+        $purchaseOrders = PurchaseOrder::query();
+        $search = request()->get('search');
+        if($search) {
+            $purchaseOrders = $purchaseOrders->where('po_number','like','%'.$search.'%')->
+                orWhere('buyer_name','like','%'.$search.'%');
+        }
+        $purchaseOrders = $purchaseOrders->orderBy('id', 'desc')->paginate(10);
 
-        return PurchaseOrderResource::collection($data);
+
+        return PurchaseOrderResource::collection($purchaseOrders);
     }
 
     /**
@@ -125,7 +134,7 @@ class PurchaseOrderController extends Controller
                 // Updated the Item if given item request has id, and it is one of the order items
                 if (isset($item['id']) && in_array($item['id'], $orderItemIds)) {
                     $requestItemIds[] = $item['id'];
-                    $purchaseOrder->items()->where('id', $item['id'])->update($item);
+                    $purchaseOrder->items()->where('id', $item['id'])->update(collect($item)->only(['description','quantity','unit_price', 'category_id'])->toArray());
                 } else {
                     // Create new item if the id is not given or was not related to the given Purchase order
                     $newItem = $purchaseOrder->items()->create($item);
@@ -137,7 +146,7 @@ class PurchaseOrderController extends Controller
 
             // Calculate and update the total of the purchase order based on updated items
             $total = $purchaseOrder->items()->sum(DB::raw('quantity * unit_price'));
-            $purchaseOrder->update($request->except(['items']) + ['total' => $total]);
+            $purchaseOrder->update($request->except(['items','total']) + ['total' => $total]);
         });
 
         return response()->json(['message' => 'Purchase order updated successfully!']);
