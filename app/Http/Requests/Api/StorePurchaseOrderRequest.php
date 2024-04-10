@@ -6,6 +6,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Log;
 
 class StorePurchaseOrderRequest extends FormRequest
 {
@@ -33,6 +34,20 @@ class StorePurchaseOrderRequest extends FormRequest
             'items.*.quantity' => 'required|integer',
             'items.*.category_id' => 'required|exists:App\Models\Category,id',
         ];
+    }
+
+    public function attributes():array
+    {
+        $attributes = [];
+
+        foreach ($this->input('items', []) as $index => $item) {
+            $attributes["items.$index.description"] = $index+1 ."st item description";
+            $attributes["items.$index.unit_price"] = $index+1 ."st item unit price";
+            $attributes["items.$index.quantity"] = $index+1 ."st item quantity";
+            $attributes["items.$index.category_id"] = $index+1 ."st item category";
+        }
+
+        return $attributes;
     }
 
     protected function failedValidation(Validator $validator)
