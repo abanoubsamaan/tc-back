@@ -1,4 +1,4 @@
-# Trade Centric purchase orders (CRUD APP)
+# TC purchase orders (CRUD APP)
 
 Welcome to the purchase orders CRUD application! This project is built from scratch with a focus on clean code and efficient functionality. This README will guide you through the project structure, key components, and setup instructions.
 
@@ -72,12 +72,12 @@ To set up the application on your local environment, follow these instructions:
 #### Clone the repository:
 
 ```bash
-git clone https://github.com/abanoubsamaan/trade-centric.git
+git clone https://github.com/abanoubsamaan/tc-back.git
 ````
 #### Navigate to the project directory:
 
 ```bash
-cd trade-centric
+cd tc-back
 ````
 
 #### Install dependencies using Composer:
@@ -98,6 +98,14 @@ php artisan key:generate
 #### Generate an application key:
 ```bash
 php artisan key:generate
+````
+#### Run the migrations:
+```bash
+php artisan migrate
+````
+#### Run the database seeders:
+```bash
+php artisan db:seed
 ````
 #### Start the Laravel development server:
 ```bash
