@@ -20,8 +20,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
 Route::delete('purchase-orders/delete', [PurchaseOrderController::class, 'destroyMany']);
+Route::get('purchase-orders/grouped-by-day', [PurchaseOrderController::class, 'groupedByDay']);
 Route::resource('purchase-orders', PurchaseOrderController::class);
-
 Route::resource('categories', CategoryController::class)->only(['index']);

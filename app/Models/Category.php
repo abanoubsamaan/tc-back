@@ -12,7 +12,6 @@ class Category extends Model
 
     protected $guarded = [];
 
-
     public function items(): HasMany
     {
         return $this->hasMany(PurchaseOrderItem::class);

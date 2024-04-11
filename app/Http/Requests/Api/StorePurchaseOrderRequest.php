@@ -6,7 +6,6 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Log;
 
 class StorePurchaseOrderRequest extends FormRequest
 {
@@ -40,11 +39,13 @@ class StorePurchaseOrderRequest extends FormRequest
     {
         $attributes = [];
 
+        // Replace the validation errors for items to be like the following
+        // The items.0.description is required => the 1st item description is required, and so on
         foreach ($this->input('items', []) as $index => $item) {
-            $attributes["items.$index.description"] = $index+1 ."st item description";
-            $attributes["items.$index.unit_price"] = $index+1 ."st item unit price";
-            $attributes["items.$index.quantity"] = $index+1 ."st item quantity";
-            $attributes["items.$index.category_id"] = $index+1 ."st item category";
+            $attributes["items. $index .description"] = $index+1 ."st item description";
+            $attributes["items. $index .unit_price"] = $index+1 ."st item unit price";
+            $attributes["items. $index .quantity"] = $index+1 ."st item quantity";
+            $attributes["items. $index .category_id"] = $index+1 ."st item category";
         }
 
         return $attributes;
@@ -59,6 +60,5 @@ class StorePurchaseOrderRequest extends FormRequest
         ], 422);
 
         throw new HttpResponseException($response);
-
     }
 }

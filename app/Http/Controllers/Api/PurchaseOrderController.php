@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StorePurchaseOrderRequest;
 use App\Http\Requests\Api\UpdatePurchaseOrderRequest;
-use App\Http\Resources\PurchaseOrderResource;
+use App\Http\Resources\Api\PurchaseOrderResource;
 use App\Models\Item;
 use App\Models\PurchaseOrder;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -18,7 +19,7 @@ use Psr\Container\NotFoundExceptionInterface;
 class PurchaseOrderController extends Controller
 {
     /**
-     * Get all purchase paginated in descending order
+     * Get all purchase paginated in descending order with search query param
      * @return AnonymousResourceCollection
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
@@ -27,12 +28,13 @@ class PurchaseOrderController extends Controller
     {
         $purchaseOrders = PurchaseOrder::query();
         $search = request()->get('search');
+
         if($search) {
             $purchaseOrders = $purchaseOrders->where('po_number','like','%'.$search.'%')->
                 orWhere('buyer_name','like','%'.$search.'%');
         }
-        $purchaseOrders = $purchaseOrders->orderBy('id', 'desc')->paginate(10);
 
+        $purchaseOrders = $purchaseOrders->orderBy('id', 'desc')->paginate(10);
 
         return PurchaseOrderResource::collection($purchaseOrders);
     }
@@ -58,7 +60,7 @@ class PurchaseOrderController extends Controller
         DB::transaction(function () use ($request) {
             // Calculate order total before inserting the order itself to avoid one more query
             $total = collect($request->items)->sum(function ($item) {
-                return $item['quantity'] * $item['unit_price'];
+                return  $item['unit_price'] * $item['quantity'];
             });
 
             // Create purchase order
@@ -78,6 +80,7 @@ class PurchaseOrderController extends Controller
      * - If the item doesn't have ID, it will be considered as a new item
      * - Delete the items that not exist in request
      * - Making sure that the Total value in the purchase order is updated accordingly
+     * @smell This method is created to showcase another option for updating the PO
      * @param  UpdatePurchaseOrderRequest  $request
      * @param  PurchaseOrder  $purchaseOrder
      * @return JsonResponse
@@ -131,13 +134,16 @@ class PurchaseOrderController extends Controller
         // Wrap all DB queries in a transaction
         DB::transaction(function () use ($request, $purchaseOrder) {
             // Updated or create items
+            // Get all items ids for this PO as array
             $orderItemIds = $purchaseOrder->items->pluck('id')->toArray();
             $requestItemIds = [];
+            // Iterate over the request items
             foreach ($request->items as $item) {
-                // Updated the Item if given item request has id, and it is one of the order items
+                // Update the Item if given item request has an id, and it is one of the order items
                 if (isset($item['id']) && in_array($item['id'], $orderItemIds)) {
                     $requestItemIds[] = $item['id'];
-                    $purchaseOrder->items()->where('id', $item['id'])->update(collect($item)->only(['description','quantity','unit_price', 'category_id'])->toArray());
+                    $requestItemData = collect($item)->only(['description','quantity','unit_price', 'category_id'])->toArray();
+                    $purchaseOrder->items()->where('id', $item['id'])->update($requestItemData);
                 } else {
                     // Create new item if the id is not given or was not related to the given Purchase order
                     $newItem = $purchaseOrder->items()->create($item);
@@ -147,8 +153,9 @@ class PurchaseOrderController extends Controller
             // Delete items that not exist in the request
             $purchaseOrder->items()->whereNotIn('id', $requestItemIds)->delete();
 
-            // Calculate and update the total of the purchase order based on updated items
+            // Calculate the total of the purchase order after adding / updating / deleting the items
             $total = $purchaseOrder->items()->sum(DB::raw('quantity * unit_price'));
+            // Update the purchase order information
             $purchaseOrder->update($request->except(['items','total']) + ['total' => $total]);
         });
 
@@ -192,6 +199,22 @@ class PurchaseOrderController extends Controller
         DB::commit();
 
         return response()->json(['message' => 'Purchase orders deleted successfully!']);
+    }
+
+    /**
+     * @smell not covered in unit tests
+     * @return mixed
+     */
+    public function groupedByDay(): mixed
+    {
+        $startDate = Carbon::now()->startOfMonth();
+        $endDate = Carbon::now()->endOfMonth();
+
+        return PurchaseOrder::selectRaw("DATE_FORMAT(created_at, '%b %d') as date, COUNT(*) as count")
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get();
     }
 
 
