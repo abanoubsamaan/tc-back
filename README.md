@@ -37,7 +37,7 @@ The `PurchaseOrderController` is the primary controller responsible for handling
 
 
 ### Factories
-I have utilized Laravel's factory feature to streamline the process of generating dummy data for testing purposes, enhancing the efficiency of our development workflow.- [StorePurchaseOrderRequest.php](app/Http/Requests/Api/StorePurchaseOrderRequest.php)
+I have utilized Laravel's factory feature to streamline the process of generating dummy data for testing purposes, enhancing the efficiency of our development workflow.
 - [PurchaseOrderFactory.php](database/factories/PurchaseOrderFactory.php)
 - [PurchaseOrderItemFactory.php](database/factories/PurchaseOrderItemFactory.php)
 
